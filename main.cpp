@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+//#include <cstring>
 #include <cstdlib>
 #include <ctime>
 /* run this program using the console pauser or add your own getch, system("pause") or input loop */
@@ -12,12 +13,14 @@ string FirstName = "FName.txt";
 string SurName = "SName.txt";
 string CustomerList = "CustomerList.txt";
 
+//bool check_customer_existence(string &rstFile, string st);
+
 int main(int argc, char** argv) {
 	
 	ifstream fFName, fSName;	
-	ofstream fCustomer;
-	string fname, sname, customer;
-	int i, j, randNo1, randNo2, fNameCounter, sNameCounter, customerCounter = CUSTOMER_LIST_SIZE;
+	fstream fCustomer;
+	string fname, sname, customer, tempBuffer;
+	int i, j, randNo1, randNo2, fNameCounter, sNameCounter, regenerationCounter = 0, customerCounter = CUSTOMER_LIST_SIZE;
 	
 	fstream f1;
 	
@@ -47,8 +50,8 @@ int main(int argc, char** argv) {
 	}	
 	cout << "Surname amount: " << sNameCounter << endl;	
 	
-	/****** Creating Customer List File ******/
-	fCustomer.open(CustomerList.c_str(), ios_base::out);
+	/****** Creating Customer List File ******/	
+	fCustomer.open(CustomerList.c_str(), ios_base::out | ios_base::in | ios_base::trunc);
 	if(!fCustomer.is_open()){
 		cerr << "Error in output file opening\n";
 		exit(EXIT_FAILURE);
@@ -57,6 +60,7 @@ int main(int argc, char** argv) {
 	cout << endl;
 	while(customerCounter--)
 	{
+		REGENERATE:
 		randNo1 = rand() % fNameCounter + 1;
 		fFName.clear();
 		fFName.seekg(0, ios_base::beg);
@@ -72,12 +76,19 @@ int main(int argc, char** argv) {
 		}
 		
 		customer = fname + " " + sname + "\n";	
-		// bu isimli müsteri daha önce yaratýlmýþ mý, kontrol et!
-		
+		//if ( true == check_customer_existence(tempBuffer, customer) ){		
+		if( tempBuffer.find(customer) != string::npos ){
+			if(++regenerationCounter < 10){
+				cout << "\t" << regenerationCounter << ". regeneration for " << customer;			
+				goto REGENERATE;
+			}
+		}
+		regenerationCounter = 0;
 		cout << CUSTOMER_LIST_SIZE - customerCounter << " " << customer;
-		fCustomer << customer;
+		tempBuffer += customer;
 		// müþterinin yanýna numarasýný da ekle.			
 	}
+	fCustomer << tempBuffer;
 	
 	fFName.close();
 	fSName.close();
@@ -85,3 +96,16 @@ int main(int argc, char** argv) {
 	
 	return 0;
 }
+/*
+bool check_customer_existence(string &rstFile, string st)
+{
+	string line;
+	
+	while(){		
+		getline(rstFile, line);
+		if(line == st)
+			return true;			
+	}
+	return false;	
+}
+*/
